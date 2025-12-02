@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Check, Loader2, ArrowLeft, Save } from 'lucide-react'
+import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
 
 type WorkoutLog = {
     id?: string
@@ -78,6 +80,31 @@ export default function ActiveWorkoutPage() {
         }
     })
 
+    // Fetch Previous Logs
+    const { data: previousLogs } = useQuery({
+        queryKey: ['previousLogs', activeExercises.map(e => e.id).join(',')],
+        queryFn: async () => {
+            if (activeExercises.length === 0) return []
+            const { data, error } = await supabase
+                .from('workout_logs')
+                .select('exercise_id, weight, reps, created_at')
+                .in('exercise_id', activeExercises.map(e => e.id))
+                .order('created_at', { ascending: false })
+                .limit(500)
+
+            if (error) throw error
+            return data
+        },
+        enabled: activeExercises.length > 0
+    })
+
+    const getLastLog = (exerciseId: string) => {
+        if (!previousLogs) return null
+        return previousLogs.find(l => l.exercise_id === exerciseId && l.weight && l.weight > 0)
+    }
+
+
+
     // Load exercises when day is selected
     useEffect(() => {
         const loadDayExercises = async () => {
@@ -116,6 +143,18 @@ export default function ActiveWorkoutPage() {
             loadDayExercises()
         }
     }, [selectedDayId, supabase])
+
+    // Warn on exit
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (activeExercises.length > 0 && logs.some(l => l.reps || l.weight)) {
+                e.preventDefault()
+                e.returnValue = ''
+            }
+        }
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    }, [activeExercises, logs])
 
     const addExercise = (exerciseId: string) => {
         const exercise = allExercises?.find(e => e.id === exerciseId)
@@ -167,6 +206,12 @@ export default function ActiveWorkoutPage() {
             if (updateError) throw updateError
         },
         onSuccess: () => {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            })
+            toast.success("Workout completed! Great job!")
             router.push('/')
         }
     })
@@ -214,8 +259,13 @@ export default function ActiveWorkoutPage() {
             <div className="space-y-6">
                 {activeExercises.map((exercise, index) => (
                     <Card key={`${exercise.id}-${index}`}>
-                        <CardHeader className="py-3 bg-muted/50">
+                        <CardHeader className="py-3 bg-muted/50 flex flex-row items-center justify-between space-y-0">
                             <CardTitle className="text-base">{exercise.name}</CardTitle>
+                            {getLastLog(exercise.id) && (
+                                <span className="text-xs text-muted-foreground">
+                                    Last: {getLastLog(exercise.id)?.weight}kg × {getLastLog(exercise.id)?.reps}
+                                </span>
+                            )}
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="grid grid-cols-[40px_1fr_1fr_40px] gap-2 p-2 text-xs font-medium text-muted-foreground text-center border-b">

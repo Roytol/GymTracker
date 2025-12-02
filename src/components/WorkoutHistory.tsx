@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 type CompletedWorkout = {
     id: string
@@ -109,6 +110,7 @@ export function WorkoutHistory() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['workoutDetails', selectedWorkoutId] })
             setIsEditing(false)
+            toast.success("Workout updated successfully")
         }
     })
 

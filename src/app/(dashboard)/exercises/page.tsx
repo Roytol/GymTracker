@@ -10,9 +10,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from '@/components/ui/select'
-import { Plus, Search, Loader2, Trash2, Pencil } from 'lucide-react'
+import { Plus, Search, Loader2, Trash2, Pencil, Dumbbell } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/context/AuthContext'
+import { toast } from 'sonner'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -78,6 +79,7 @@ export default function ExercisesPage() {
             queryClient.invalidateQueries({ queryKey: ['exercises'] })
             setIsDialogOpen(false)
             setNewExercise({ name: '', category: '', description: '' })
+            toast.success("Exercise added successfully")
         }
     })
 
@@ -98,11 +100,9 @@ export default function ExercisesPage() {
             return data
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['exercises'] })
-            setIsDialogOpen(false)
-            setEditingExercise(null)
             setIsEditMode(false)
             setNewExercise({ name: '', category: '', description: '' })
+            toast.success("Exercise updated successfully")
         }
     })
 
@@ -113,6 +113,7 @@ export default function ExercisesPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['exercises'] })
+            toast.success("Exercise deleted successfully")
         }
     })
 
@@ -275,8 +276,11 @@ export default function ExercisesPage() {
                     ))
                 )}
                 {filteredExercises?.length === 0 && (
-                    <div className="text-center p-8 text-muted-foreground">
-                        No exercises found. Add one to get started!
+                    <div className="flex flex-col items-center justify-center py-12 text-center space-y-3 text-muted-foreground">
+                        <div className="bg-muted p-4 rounded-full">
+                            <Dumbbell className="h-8 w-8 opacity-50" />
+                        </div>
+                        <p>No exercises found. Add one to get started!</p>
                     </div>
                 )}
             </div>

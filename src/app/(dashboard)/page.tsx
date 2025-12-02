@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Play, LogOut, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react"
+import { Plus, Play, LogOut, Calendar as CalendarIcon, CheckCircle2, Dumbbell } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
@@ -191,13 +191,18 @@ export default function Home() {
             </Card>
           )
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>No Active Program</CardTitle>
-              <CardDescription>Create a program to get started.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" asChild>
+          <Card className="border-dashed border-2">
+            <CardContent className="flex flex-col items-center justify-center py-10 text-center space-y-4">
+              <div className="bg-primary/10 p-4 rounded-full">
+                <Dumbbell className="h-8 w-8 text-primary" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-semibold text-lg">No Active Program</h3>
+                <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">
+                  You don't have a workout program set up yet. Create one to start tracking your progress!
+                </p>
+              </div>
+              <Button className="w-full max-w-xs" asChild>
                 <Link href="/programs/new">
                   <Plus className="mr-2 h-4 w-4" /> Create Program
                 </Link>

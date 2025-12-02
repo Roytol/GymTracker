@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Save, Loader2, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 type Exercise = {
     id: string
@@ -301,10 +302,11 @@ export default function NewProgramPage() {
                 }
             }
 
+            toast.success("Program created successfully!")
             router.push('/programs')
         } catch (error) {
             console.error('Error saving program:', error)
-            alert('Failed to save program')
+            toast.error('Failed to save program')
         } finally {
             setIsSubmitting(false)
         }

@@ -2,15 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Dumbbell, Calendar, User } from 'lucide-react'
+import { Home, Dumbbell, Calendar, User, List, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/programs', label: 'Programs', icon: Calendar },
     { href: '/workout', label: 'Workout', icon: Dumbbell },
-    { href: '/exercises', label: 'Exercises', icon: Dumbbell }, // Maybe use a list icon?
-    // { href: '/profile', label: 'Profile', icon: User },
+    { href: '/exercises', label: 'Exercises', icon: List },
+    { href: '/progress', label: 'Progress', icon: TrendingUp },
 ]
 
 export function BottomNav() {
