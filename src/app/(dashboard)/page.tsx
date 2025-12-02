@@ -119,7 +119,7 @@ export default function Home() {
       <WeeklyCalendar schedule={schedule} />
 
       <section>
-        <h2 className="text-lg font-semibold mb-4">Today's Workout</h2>
+        <h2 className="text-lg font-semibold mb-4">Today&apos;s Workout</h2>
         {activeProgram ? (
           todaysWorkout && todaysWorkout.exercises.length > 0 ? (
             <Card className="bg-primary text-primary-foreground border-none shadow-lg relative overflow-hidden">

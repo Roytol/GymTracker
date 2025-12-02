@@ -1,6 +1,13 @@
 const { Client } = require('pg');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
-const connectionString = 'postgresql://postgres.ljsvhaooszjmscqkphit:1JbDeJdUYKbtxGOT@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres';
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+    console.error('DATABASE_URL is not defined in .env.local');
+    process.exit(1);
+}
 
 async function migrate() {
     const client = new Client({

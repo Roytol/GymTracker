@@ -253,7 +253,8 @@ export default function ExercisesPage() {
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Delete Exercise?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        Are you sure you want to delete "{exercise.name}"? This action cannot be undone.
+                                                        This action cannot be undone. This will permanently delete the exercise
+                                                        &quot;{exercise.name}&quot; and remove it from all programs.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>

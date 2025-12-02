@@ -128,7 +128,8 @@ export default function ProgramsPage() {
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Delete Program?</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        This will permanently delete "{program.name}" and all its workout history. This action cannot be undone.
+                                                        This action cannot be undone. This will permanently delete the program
+                                                        &quot;{program.name}&quot; and all its associated data.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>

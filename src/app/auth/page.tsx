@@ -65,11 +65,11 @@ export default function AuthPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-            <Card className="w-full max-w-md">
+        <div className="flex items-center justify-center min-h-screen bg-background p-4 transition-colors duration-300">
+            <Card className="w-full max-w-md border-border/50 shadow-xl">
                 <CardHeader className="text-center">
                     <div className="flex justify-center mb-4">
-                        <div className="relative h-16 w-16 overflow-hidden rounded-2xl shadow-md">
+                        <div className="relative h-16 w-16 overflow-hidden rounded-2xl shadow-md ring-1 ring-border/50">
                             <Image
                                 src="/logo-v2.png"
                                 alt="GymTracker Logo"
@@ -79,7 +79,7 @@ export default function AuthPage() {
                             />
                         </div>
                     </div>
-                    <CardTitle className="text-2xl font-bold">GymTracker</CardTitle>
+                    <CardTitle className="text-3xl font-bold tracking-tight text-[#007AFF] dark:text-[#0A84FF]">GymTracker</CardTitle>
                     <CardDescription>Track your progress, achieve your goals.</CardDescription>
                 </CardHeader>
                 <CardContent>

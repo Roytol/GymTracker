@@ -1,19 +1,14 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
-// const dotenv = require('dotenv');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
 
-// Load env vars from .env file since we can't rely on Next.js to load them for this script
-// But since we can't easily read .env if it's gitignored and we just failed to write it...
-// I'll hardcode the connection string passed by the user for this script execution, 
-// or try to read the file if I can (I can read it, just not write it via tool if ignored? No, I can't access it if ignored).
-// Wait, I can't read .env if it's ignored? The tool `view_file` respects gitignore?
-// "Search uses smart case and will ignore gitignored files by default." -> find_by_name
-// "view_file" -> "View the contents of a file... This tool supports some binary files..." - doesn't explicitly say it respects gitignore, but the error message above said "Access to ... is prohibited by ... .gitignore".
-// So I cannot read/write .env.
-// I will use the connection string directly in this script.
+const connectionString = process.env.DATABASE_URL;
 
-const connectionString = 'postgresql://postgres.ljsvhaooszjmscqkphit:1JbDeJdUYKbtxGOT@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres';
+if (!connectionString) {
+    console.error('DATABASE_URL is not defined in .env.local');
+    process.exit(1);
+}
 
 async function migrate() {
     const client = new Client({
