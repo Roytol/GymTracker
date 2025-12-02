@@ -126,10 +126,10 @@ export default function ProgressPage() {
                                                             <p className="text-sm font-medium mb-2">{label}</p>
                                                             <div className="space-y-1 text-sm">
                                                                 <p className="text-primary font-bold">
-                                                                    1RM: {data.oneRepMax}kg
+                                                                    Max Weight: {data.weight}kg
                                                                 </p>
                                                                 <p className="text-muted-foreground text-xs">
-                                                                    Lift: {data.weight}kg × {data.reps} reps
+                                                                    Reps: {data.reps}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -140,7 +140,7 @@ export default function ProgressPage() {
                                         />
                                         <Line
                                             type="monotone"
-                                            dataKey="oneRepMax"
+                                            dataKey="weight"
                                             stroke="#2563eb"
                                             strokeWidth={2}
                                             dot={{ r: 4, fill: "#2563eb" }}
