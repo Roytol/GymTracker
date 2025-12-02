@@ -135,8 +135,8 @@ export default function Home() {
         </div>
         <div className="flex gap-2">
           <ThemeToggle />
-          <Button size="icon" variant="ghost" onClick={() => signOut()} className="rounded-full hover:bg-muted">
-            <LogOut className="h-5 w-5" />
+          <Button size="icon" variant="ghost" onClick={() => signOut()} className="rounded-full hover:bg-muted hover:bg-red-500/10">
+            <LogOut className="h-5 w-5 text-red-500" />
           </Button>
         </div>
       </header>
