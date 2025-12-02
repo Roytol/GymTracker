@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Play, LogOut, Calendar as CalendarIcon } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { WeeklyCalendar } from "@/components/WeeklyCalendar"
 import { useQuery } from "@tanstack/react-query"
@@ -92,9 +93,20 @@ export default function Home() {
   return (
     <div className="space-y-6">
       <header className="flex justify-between items-center sticky top-0 z-10 bg-background/80 backdrop-blur-md py-4 -mx-4 px-4 border-b border-border/40">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">GymTracker</h1>
-          <p className="text-muted-foreground font-medium">{formattedDate}</p>
+        <div className="flex items-center gap-3">
+          <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-sm">
+            <Image
+              src="/logo-v2.png"
+              alt="GymTracker Logo"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-primary leading-none">GymTracker</h1>
+            <p className="text-muted-foreground text-xs font-medium">{formattedDate}</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <ThemeToggle />

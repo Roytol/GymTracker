@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2 } from 'lucide-react'
+import Image from 'next/image'
 
 const authSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -67,6 +68,17 @@ export default function AuthPage() {
         <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                        <div className="relative h-16 w-16 overflow-hidden rounded-2xl shadow-md">
+                            <Image
+                                src="/logo-v2.png"
+                                alt="GymTracker Logo"
+                                fill
+                                className="object-cover"
+                                priority
+                            />
+                        </div>
+                    </div>
                     <CardTitle className="text-2xl font-bold">GymTracker</CardTitle>
                     <CardDescription>Track your progress, achieve your goals.</CardDescription>
                 </CardHeader>
