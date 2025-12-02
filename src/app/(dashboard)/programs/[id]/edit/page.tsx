@@ -90,11 +90,11 @@ export default function EditProgramPage() {
             setDescription(programData.program.description || '')
 
             // Map existing days to the state structure
-            const newDays = WEEKDAYS.map(dayName => {
-                const existingDay = programData.days.find((d: any) => d.name === dayName)
+            const newDays = WEEKDAYS.map((dayName, index) => {
+                const existingDay = programData.days.find((d: any) => d.order === index)
                 if (existingDay) {
                     return {
-                        name: dayName,
+                        name: existingDay.name,
                         exercises: existingDay.exercises
                             .sort((a: any, b: any) => a.order - b.order)
                             .map((ex: any) => ({

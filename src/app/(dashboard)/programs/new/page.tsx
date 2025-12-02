@@ -72,10 +72,24 @@ export default function NewProgramPage() {
         setDays(newDays)
     }
 
-    const applyTemplate = (type: 'empty' | 'ppl' | 'ul' | 'fb') => {
-        let newDays = WEEKDAYS.map(day => ({ name: day, exercises: [] }))
+    const applyTemplate = (type: 'empty' | 'ppl' | 'ul' | 'fb' | 'pp') => {
+        let newDays: ProgramDay[] = WEEKDAYS.map(day => ({ name: day, exercises: [] }))
         let newName = ''
         let newDesc = ''
+
+        // Helper to find exercise ID by name (case-insensitive partial match)
+        const findEx = (name: string) => {
+            if (!exercises) return ''
+            const found = exercises.find(e => e.name.toLowerCase().includes(name.toLowerCase()))
+            return found ? found.id : ''
+        }
+
+        // Helper to create exercise object
+        const createEx = (name: string, sets: number = 3, reps: string = '10') => ({
+            exercise_id: findEx(name),
+            sets,
+            reps
+        })
 
         switch (type) {
             case 'ppl':
@@ -83,11 +97,47 @@ export default function NewProgramPage() {
                 newDesc = '6-day split focusing on pushing, pulling, and leg movements.'
                 // Mon=Push, Tue=Pull, Wed=Legs, Thu=Push, Fri=Pull, Sat=Legs
                 newDays[0].name = 'Push A'
+                newDays[0].exercises = [
+                    createEx('Bench Press'),
+                    createEx('Overhead Press'),
+                    createEx('Incline Dumbbell Press'),
+                    createEx('Tricep Pushdown')
+                ]
                 newDays[1].name = 'Pull A'
+                newDays[1].exercises = [
+                    createEx('Deadlift'),
+                    createEx('Pull Up'),
+                    createEx('Barbell Row'),
+                    createEx('Bicep Curl')
+                ]
                 newDays[2].name = 'Legs A'
+                newDays[2].exercises = [
+                    createEx('Squat'),
+                    createEx('Leg Press'),
+                    createEx('Leg Extension'),
+                    createEx('Calf Raise')
+                ]
                 newDays[3].name = 'Push B'
+                newDays[3].exercises = [
+                    createEx('Overhead Press'),
+                    createEx('Bench Press'),
+                    createEx('Lateral Raise'),
+                    createEx('Skullcrusher')
+                ]
                 newDays[4].name = 'Pull B'
+                newDays[4].exercises = [
+                    createEx('Barbell Row'),
+                    createEx('Lat Pulldown'),
+                    createEx('Face Pull'),
+                    createEx('Hammer Curl')
+                ]
                 newDays[5].name = 'Legs B'
+                newDays[5].exercises = [
+                    createEx('Deadlift'),
+                    createEx('Lunge'),
+                    createEx('Leg Curl'),
+                    createEx('Calf Raise')
+                ]
                 newDays[6].name = 'Rest'
                 break
             case 'ul':
@@ -95,10 +145,34 @@ export default function NewProgramPage() {
                 newDesc = '4-day split dividing training into upper and lower body sessions.'
                 // Mon=Upper, Tue=Lower, Thu=Upper, Fri=Lower
                 newDays[0].name = 'Upper A'
+                newDays[0].exercises = [
+                    createEx('Bench Press'),
+                    createEx('Barbell Row'),
+                    createEx('Overhead Press'),
+                    createEx('Lat Pulldown')
+                ]
                 newDays[1].name = 'Lower A'
+                newDays[1].exercises = [
+                    createEx('Squat'),
+                    createEx('Deadlift'),
+                    createEx('Leg Extension'),
+                    createEx('Leg Curl')
+                ]
                 newDays[2].name = 'Rest'
                 newDays[3].name = 'Upper B'
+                newDays[3].exercises = [
+                    createEx('Incline Dumbbell Press'),
+                    createEx('Pull Up'),
+                    createEx('Lateral Raise'),
+                    createEx('Bicep Curl')
+                ]
                 newDays[4].name = 'Lower B'
+                newDays[4].exercises = [
+                    createEx('Leg Press'),
+                    createEx('Lunge'),
+                    createEx('Calf Raise'),
+                    createEx('Plank')
+                ]
                 newDays[5].name = 'Rest'
                 newDays[6].name = 'Rest'
                 break
@@ -107,10 +181,61 @@ export default function NewProgramPage() {
                 newDesc = '3-day split working the entire body each session.'
                 // Mon, Wed, Fri
                 newDays[0].name = 'Full Body A'
+                newDays[0].exercises = [
+                    createEx('Squat'),
+                    createEx('Bench Press'),
+                    createEx('Barbell Row')
+                ]
                 newDays[1].name = 'Rest'
                 newDays[2].name = 'Full Body B'
+                newDays[2].exercises = [
+                    createEx('Deadlift'),
+                    createEx('Overhead Press'),
+                    createEx('Pull Up')
+                ]
                 newDays[3].name = 'Rest'
                 newDays[4].name = 'Full Body C'
+                newDays[4].exercises = [
+                    createEx('Lunge'),
+                    createEx('Dips'),
+                    createEx('Chin Up')
+                ]
+                newDays[5].name = 'Rest'
+                newDays[6].name = 'Rest'
+                break
+            case 'pp':
+                newName = 'Push Pull'
+                newDesc = '4-day split focusing on upper body push and pull movements.'
+                // Mon=Push, Tue=Pull, Thu=Push, Fri=Pull
+                newDays[0].name = 'Push A'
+                newDays[0].exercises = [
+                    createEx('Bench Press'),
+                    createEx('Overhead Press'),
+                    createEx('Incline Dumbbell Press'),
+                    createEx('Tricep Pushdown')
+                ]
+                newDays[1].name = 'Pull A'
+                newDays[1].exercises = [
+                    createEx('Barbell Row'),
+                    createEx('Lat Pulldown'),
+                    createEx('Face Pull'),
+                    createEx('Bicep Curl')
+                ]
+                newDays[2].name = 'Rest'
+                newDays[3].name = 'Push B'
+                newDays[3].exercises = [
+                    createEx('Overhead Press'),
+                    createEx('Dips'),
+                    createEx('Lateral Raise'),
+                    createEx('Skullcrusher')
+                ]
+                newDays[4].name = 'Pull B'
+                newDays[4].exercises = [
+                    createEx('Pull Up'),
+                    createEx('Seated Row'),
+                    createEx('Hammer Curl'),
+                    createEx('Shrugs')
+                ]
                 newDays[5].name = 'Rest'
                 newDays[6].name = 'Rest'
                 break
@@ -158,13 +283,15 @@ export default function NewProgramPage() {
                 if (dayError) throw dayError
 
                 if (day.exercises.length > 0) {
-                    const exercisesToInsert = day.exercises.map((ex, idx) => ({
-                        day_id: dayData.id,
-                        exercise_id: ex.exercise_id,
-                        sets: ex.sets,
-                        reps: ex.reps,
-                        order: idx
-                    }))
+                    const exercisesToInsert = day.exercises
+                        .filter(ex => ex.exercise_id && ex.exercise_id.trim() !== '')
+                        .map((ex, idx) => ({
+                            day_id: dayData.id,
+                            exercise_id: ex.exercise_id,
+                            sets: ex.sets,
+                            reps: ex.reps,
+                            order: idx
+                        }))
 
                     const { error: exError } = await supabase
                         .from('program_exercises')
@@ -220,6 +347,14 @@ export default function NewProgramPage() {
                         </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground text-sm">3 days/week. Efficient for beginners or busy schedules.</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95" onClick={() => applyTemplate('pp')}>
+                        <CardHeader>
+                            <CardTitle>Push Pull</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm">4 days/week. Upper body focus, no dedicated leg days.</p>
                         </CardContent>
                     </Card>
                     <Card className="cursor-pointer hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95 border-dashed" onClick={() => applyTemplate('empty')}>

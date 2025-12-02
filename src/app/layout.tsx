@@ -24,10 +24,6 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "GymTracker",
   },
-  icons: {
-    icon: "/icon.png",
-    apple: "/logo-v2.png",
-  },
 };
 
 export const viewport: Viewport = {

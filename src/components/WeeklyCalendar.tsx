@@ -9,6 +9,7 @@ const FULL_WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', '
 type WeeklyCalendarProps = {
     schedule?: {
         dayName: string
+        dayOrder: number
         hasWorkout: boolean
     }[]
 }
@@ -26,7 +27,7 @@ export function WeeklyCalendar({ schedule }: WeeklyCalendarProps) {
         date.setDate(startOfWeek.getDate() + i)
 
         const dayName = FULL_WEEKDAYS[i]
-        const hasWorkout = schedule?.find(s => s.dayName === dayName)?.hasWorkout
+        const hasWorkout = schedule?.find(s => s.dayOrder === i)?.hasWorkout
 
         return {
             day: WEEKDAYS[i],

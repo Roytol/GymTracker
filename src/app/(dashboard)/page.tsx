@@ -62,7 +62,7 @@ export default function Home() {
         .from('program_days')
         .select('*, exercises:program_exercises(*)')
         .eq('program_id', activeProgram.id)
-        .eq('name', currentDayName)
+        .eq('"order"', currentDayIndex)
         .single()
 
       if (error && error.code !== 'PGRST116') throw error
@@ -78,13 +78,14 @@ export default function Home() {
       if (!activeProgram) return []
       const { data, error } = await supabase
         .from('program_days')
-        .select('name, exercises:program_exercises(id)')
+        .select('name, order, exercises:program_exercises(id)')
         .eq('program_id', activeProgram.id)
 
       if (error) throw error
 
       return data.map(day => ({
         dayName: day.name,
+        dayOrder: day.order,
         hasWorkout: day.exercises && day.exercises.length > 0
       }))
     },
@@ -143,7 +144,7 @@ export default function Home() {
       <WeeklyCalendar schedule={schedule} />
 
       {/* Celebration Message */}
-      {schedule?.find(d => d.dayName === currentDayName && d.hasWorkout) && (
+      {schedule?.find(d => d.dayOrder === currentDayIndex && d.hasWorkout) && (
         // This is a simplified check. Ideally we check the actual workout status.
         // Let's improve this by fetching today's completed workout.
         <CelebrationCheck supabase={supabase} userId={user?.id} />

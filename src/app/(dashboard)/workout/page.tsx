@@ -71,7 +71,7 @@ export default function WorkoutPage() {
                 .from('program_days')
                 .select('*, exercises:program_exercises(*)')
                 .eq('program_id', activeProgram.id)
-                .eq('name', currentDayName)
+                .eq('"order"', currentDayIndex)
                 .single()
 
             if (error && error.code !== 'PGRST116') throw error
@@ -104,7 +104,7 @@ export default function WorkoutPage() {
     })
 
     const startWorkoutMutation = useMutation({
-        mutationFn: async (programId?: string) => {
+        mutationFn: async ({ programId, programDayId }: { programId?: string, programDayId?: string }) => {
             if (!user) throw new Error('User not authenticated')
 
             const { data, error } = await supabase
@@ -112,6 +112,7 @@ export default function WorkoutPage() {
                 .insert({
                     user_id: user.id,
                     program_id: programId || null,
+                    program_day_id: programDayId || null,
                     status: 'in_progress'
                 })
                 .select()
@@ -161,7 +162,7 @@ export default function WorkoutPage() {
                             ) : (
                                 <Button
                                     className="w-full font-bold h-14 text-lg bg-white text-black hover:bg-white/90 shadow-md transition-all hover:scale-[1.02] active:scale-95"
-                                    onClick={() => startWorkoutMutation.mutate(activeProgram.id)}
+                                    onClick={() => startWorkoutMutation.mutate({ programId: activeProgram.id, programDayId: todaysWorkout.id })}
                                     disabled={startWorkoutMutation.isPending}
                                 >
                                     {startWorkoutMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5 fill-current" />}
@@ -189,7 +190,7 @@ export default function WorkoutPage() {
                         <Card
                             key={program.id}
                             className="cursor-pointer hover:bg-accent/50 transition-colors border-border/50"
-                            onClick={() => startWorkoutMutation.mutate(program.id)}
+                            onClick={() => startWorkoutMutation.mutate({ programId: program.id })}
                         >
                             <CardHeader className="p-4 flex flex-row items-center justify-between space-y-0">
                                 <CardTitle className="text-base font-medium">{program.name}</CardTitle>

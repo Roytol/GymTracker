@@ -50,6 +50,12 @@ export default function ActiveWorkoutPage() {
         }
     })
 
+    useEffect(() => {
+        if (workout?.program_day_id) {
+            setSelectedDayId(workout.program_day_id)
+        }
+    }, [workout])
+
     // Fetch Program Days if applicable
     const { data: programDays } = useQuery({
         queryKey: ['programDays', workout?.program_id],
@@ -194,9 +200,9 @@ export default function ActiveWorkoutPage() {
         <div className="space-y-6 pb-24">
             <header className="flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur z-10 py-2 border-b">
                 <div className="flex items-center gap-2">
-                    {/* <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button> */}
+                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
                     <h1 className="text-xl font-bold">Active Workout</h1>
                 </div>
                 <Button size="sm" onClick={() => finishWorkoutMutation.mutate()} disabled={finishWorkoutMutation.isPending}>
