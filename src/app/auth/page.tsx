@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const authSchema = z.object({
     email: z.string().email({ message: "Invalid email address" }),
@@ -65,7 +66,10 @@ export default function AuthPage() {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background p-4 transition-colors duration-300">
+        <div className="flex items-center justify-center min-h-screen bg-background p-4 transition-colors duration-300 relative">
+            <div className="absolute top-4 right-4">
+                <ThemeToggle />
+            </div>
             <Card className="w-full max-w-md border-border/50 shadow-xl">
                 <CardHeader className="text-center">
                     <div className="flex justify-center mb-4">
@@ -84,9 +88,9 @@ export default function AuthPage() {
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="login" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-4">
-                            <TabsTrigger value="login">Login</TabsTrigger>
-                            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-2 mb-6 h-12 p-1 bg-muted/50">
+                            <TabsTrigger value="login" className="h-full text-base font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all">Login</TabsTrigger>
+                            <TabsTrigger value="signup" className="h-full text-base font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all">Sign Up</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="login">
@@ -102,8 +106,8 @@ export default function AuthPage() {
                                     {form.formState.errors.password && <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>}
                                 </div>
                                 {error && <p className="text-sm text-red-500">{error}</p>}
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                <Button type="submit" className="w-full h-12 text-lg font-semibold shadow-md hover:scale-[1.02] transition-all bg-[#007AFF] hover:bg-[#007AFF]/90 text-white" disabled={isLoading}>
+                                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                                     Login
                                 </Button>
                             </form>
@@ -122,8 +126,8 @@ export default function AuthPage() {
                                     {form.formState.errors.password && <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>}
                                 </div>
                                 {error && <p className="text-sm text-red-500">{error}</p>}
-                                <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                <Button type="submit" className="w-full h-12 text-lg font-semibold shadow-md hover:scale-[1.02] transition-all bg-[#007AFF] hover:bg-[#007AFF]/90 text-white" disabled={isLoading}>
+                                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                                     Sign Up
                                 </Button>
                             </form>
