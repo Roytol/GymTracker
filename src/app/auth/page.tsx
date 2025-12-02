@@ -87,7 +87,8 @@ export default function AuthPage() {
             if (error) throw error
             setSuccess(true)
         } catch (err: any) {
-            setError(err.message)
+            console.error("Signup error:", err)
+            setError(err.message || "An error occurred during signup")
         } finally {
             setIsLoading(false)
         }
