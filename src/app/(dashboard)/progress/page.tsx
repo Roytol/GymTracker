@@ -118,8 +118,25 @@ export default function ProgressPage() {
                                             tickFormatter={(value) => `${value}kg`}
                                         />
                                         <Tooltip
-                                            contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
-                                            labelStyle={{ color: '#9ca3af' }}
+                                            content={({ active, payload, label }) => {
+                                                if (active && payload && payload.length) {
+                                                    const data = payload[0].payload
+                                                    return (
+                                                        <div className="bg-popover border border-border p-3 rounded-lg shadow-lg">
+                                                            <p className="text-sm font-medium mb-2">{label}</p>
+                                                            <div className="space-y-1 text-sm">
+                                                                <p className="text-primary font-bold">
+                                                                    1RM: {data.oneRepMax}kg
+                                                                </p>
+                                                                <p className="text-muted-foreground text-xs">
+                                                                    Lift: {data.weight}kg × {data.reps} reps
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                }
+                                                return null
+                                            }}
                                         />
                                         <Line
                                             type="monotone"
