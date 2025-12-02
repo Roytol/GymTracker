@@ -8,17 +8,31 @@ import { Play, Loader2, Dumbbell } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 
+import { WorkoutHistory } from '@/components/WorkoutHistory'
+
 type Program = {
     id: string
     name: string
 }
 
+type ProgramDay = {
+    id: string
+    name: string
+    exercises: any[]
+}
+
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
 export default function WorkoutPage() {
     const router = useRouter()
     const { user } = useAuth()
     const supabase = createClient()
+    const today = new Date()
+    const currentDayIndex = (today.getDay() + 6) % 7 // Mon=0, Sun=6
+    const currentDayName = WEEKDAYS[currentDayIndex]
 
-    const { data: programs, isLoading } = useQuery({
+    // Fetch all programs
+    const { data: programs, isLoading: isLoadingPrograms } = useQuery({
         queryKey: ['programs'],
         queryFn: async () => {
             if (!user) return []
@@ -27,6 +41,43 @@ export default function WorkoutPage() {
             return data as Program[]
         },
         enabled: !!user
+    })
+
+    // Fetch active program
+    const { data: activeProgram } = useQuery({
+        queryKey: ['activeProgram'],
+        queryFn: async () => {
+            if (!user) return null
+            const { data, error } = await supabase
+                .from('programs')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single()
+
+            if (error && error.code !== 'PGRST116') throw error
+            return data as Program | null
+        },
+        enabled: !!user
+    })
+
+    // Fetch today's workout
+    const { data: todaysWorkout, isLoading: isLoadingToday } = useQuery({
+        queryKey: ['todaysWorkout', activeProgram?.id, currentDayName],
+        queryFn: async () => {
+            if (!activeProgram) return null
+            const { data, error } = await supabase
+                .from('program_days')
+                .select('*, exercises:program_exercises(*)')
+                .eq('program_id', activeProgram.id)
+                .eq('name', currentDayName)
+                .single()
+
+            if (error && error.code !== 'PGRST116') throw error
+            return data as ProgramDay | null
+        },
+        enabled: !!activeProgram
     })
 
     const startWorkoutMutation = useMutation({
@@ -51,37 +102,77 @@ export default function WorkoutPage() {
         }
     })
 
+    const isLoading = isLoadingPrograms || isLoadingToday
+
     return (
-        <div className="space-y-6 pb-20">
+        <div className="space-y-8 pb-24">
             <header>
                 <h1 className="text-3xl font-bold tracking-tight">Workout</h1>
-                <p className="text-muted-foreground">Start a new session</p>
+                <p className="text-muted-foreground">Let&apos;s crush it today!</p>
             </header>
 
-            {/* Freestyle removed as per request */}
-
-            <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Start from Program</h2>
+            {/* Auto-Start Section */}
+            <section>
+                <h2 className="text-xl font-semibold mb-4">Today&apos;s Session</h2>
                 {isLoading ? (
-                    <div className="flex justify-center p-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <div className="flex justify-center p-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
+                ) : activeProgram && todaysWorkout && todaysWorkout.exercises.length > 0 ? (
+                    <Card className="bg-primary text-primary-foreground border-none shadow-lg relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
+                        <CardHeader>
+                            <CardTitle className="text-2xl">{todaysWorkout.name}</CardTitle>
+                            <CardDescription className="text-primary-foreground/80 text-base">
+                                {activeProgram.name} • {todaysWorkout.exercises.length} Exercises
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button
+                                className="w-full font-bold h-14 text-lg bg-white text-black hover:bg-white/90 shadow-md transition-all hover:scale-[1.02] active:scale-95"
+                                onClick={() => startWorkoutMutation.mutate(activeProgram.id)}
+                                disabled={startWorkoutMutation.isPending}
+                            >
+                                {startWorkoutMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5 fill-current" />}
+                                Start {todaysWorkout.name}
+                            </Button>
+                        </CardContent>
+                    </Card>
                 ) : (
-                    <div className="grid gap-4">
-                        {programs?.map((program) => (
-                            <Card key={program.id} className="cursor-pointer hover:bg-accent transition-colors" onClick={() => startWorkoutMutation.mutate(program.id)}>
-                                <CardHeader className="p-4 flex flex-row items-center justify-between space-y-0">
-                                    <CardTitle className="text-base">{program.name}</CardTitle>
-                                    <Play className="h-4 w-4 text-muted-foreground" />
-                                </CardHeader>
-                            </Card>
-                        ))}
-                        {programs?.length === 0 && (
-                            <p className="text-muted-foreground text-sm">No programs found. Create one to get started!</p>
-                        )}
-                    </div>
+                    <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+                            <Dumbbell className="h-10 w-10 mb-2 opacity-20" />
+                            <p>No specific workout scheduled for today.</p>
+                            <p className="text-sm">Choose a program below to start.</p>
+                        </CardContent>
+                    </Card>
                 )}
-            </div>
+            </section>
+
+            {/* Other Programs */}
+            <section className="space-y-4">
+                <h2 className="text-lg font-semibold text-muted-foreground">Start Other Program</h2>
+                <div className="grid gap-3">
+                    {programs?.map((program) => (
+                        <Card
+                            key={program.id}
+                            className="cursor-pointer hover:bg-accent/50 transition-colors border-border/50"
+                            onClick={() => startWorkoutMutation.mutate(program.id)}
+                        >
+                            <CardHeader className="p-4 flex flex-row items-center justify-between space-y-0">
+                                <CardTitle className="text-base font-medium">{program.name}</CardTitle>
+                                <Play className="h-4 w-4 text-muted-foreground" />
+                            </CardHeader>
+                        </Card>
+                    ))}
+                    {programs?.length === 0 && (
+                        <p className="text-muted-foreground text-sm">No programs found.</p>
+                    )}
+                </div>
+            </section>
+
+            {/* History */}
+            <WorkoutHistory />
         </div>
     )
 }

@@ -10,6 +10,7 @@ import { WeeklyCalendar } from "@/components/WeeklyCalendar"
 import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { CelebrationCheck } from "@/components/CelebrationCheck"
 
 type Program = {
   id: string
@@ -117,6 +118,13 @@ export default function Home() {
       </header>
 
       <WeeklyCalendar schedule={schedule} />
+
+      {/* Celebration Message */}
+      {schedule?.find(d => d.dayName === currentDayName && d.hasWorkout) && (
+        // This is a simplified check. Ideally we check the actual workout status.
+        // Let's improve this by fetching today's completed workout.
+        <CelebrationCheck supabase={supabase} userId={user?.id} />
+      )}
 
       <section>
         <h2 className="text-lg font-semibold mb-4">Today&apos;s Workout</h2>
