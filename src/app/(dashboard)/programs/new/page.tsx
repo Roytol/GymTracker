@@ -33,6 +33,7 @@ type ProgramDay = {
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export default function NewProgramPage() {
+    const [step, setStep] = useState<'template' | 'builder'>('template')
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
     const [days, setDays] = useState<ProgramDay[]>(
@@ -69,6 +70,61 @@ export default function NewProgramPage() {
         const newDays = [...days]
         newDays[dayIndex].exercises[exerciseIndex] = { ...newDays[dayIndex].exercises[exerciseIndex], [field]: value }
         setDays(newDays)
+    }
+
+    const applyTemplate = (type: 'empty' | 'ppl' | 'ul' | 'fb') => {
+        let newDays = WEEKDAYS.map(day => ({ name: day, exercises: [] }))
+        let newName = ''
+        let newDesc = ''
+
+        switch (type) {
+            case 'ppl':
+                newName = 'Push Pull Legs'
+                newDesc = '6-day split focusing on pushing, pulling, and leg movements.'
+                // Mon=Push, Tue=Pull, Wed=Legs, Thu=Push, Fri=Pull, Sat=Legs
+                newDays[0].name = 'Push A'
+                newDays[1].name = 'Pull A'
+                newDays[2].name = 'Legs A'
+                newDays[3].name = 'Push B'
+                newDays[4].name = 'Pull B'
+                newDays[5].name = 'Legs B'
+                newDays[6].name = 'Rest'
+                break
+            case 'ul':
+                newName = 'Upper Lower'
+                newDesc = '4-day split dividing training into upper and lower body sessions.'
+                // Mon=Upper, Tue=Lower, Thu=Upper, Fri=Lower
+                newDays[0].name = 'Upper A'
+                newDays[1].name = 'Lower A'
+                newDays[2].name = 'Rest'
+                newDays[3].name = 'Upper B'
+                newDays[4].name = 'Lower B'
+                newDays[5].name = 'Rest'
+                newDays[6].name = 'Rest'
+                break
+            case 'fb':
+                newName = 'Full Body'
+                newDesc = '3-day split working the entire body each session.'
+                // Mon, Wed, Fri
+                newDays[0].name = 'Full Body A'
+                newDays[1].name = 'Rest'
+                newDays[2].name = 'Full Body B'
+                newDays[3].name = 'Rest'
+                newDays[4].name = 'Full Body C'
+                newDays[5].name = 'Rest'
+                newDays[6].name = 'Rest'
+                break
+            case 'empty':
+            default:
+                newName = ''
+                newDesc = ''
+                break
+        }
+
+        setName(newName)
+        setDescription(newDesc)
+        setDays(newDays)
+        setStep('builder')
     }
 
     const handleSubmit = async () => {
@@ -130,87 +186,126 @@ export default function NewProgramPage() {
     return (
         <div className="space-y-6 pb-20">
             <header className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href="/programs">
-                        <ArrowLeft className="h-5 w-5" />
-                    </Link>
+                <Button variant="ghost" size="icon" onClick={() => step === 'builder' ? setStep('template') : router.push('/programs')}>
+                    <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">New Program</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {step === 'template' ? 'Choose Template' : 'New Program'}
+                    </h1>
                 </div>
             </header>
 
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Program Name</Label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. PPL Strength" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Goal: Hypertrophy..." />
-                </div>
-            </div>
-
-            <div className="space-y-6">
-                {days.map((day, dayIndex) => (
-                    <Card key={dayIndex} className="relative">
-                        <CardHeader className="pb-2 bg-muted/30">
-                            <CardTitle className="text-lg">{day.name}</CardTitle>
+            {step === 'template' ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95" onClick={() => applyTemplate('ppl')}>
+                        <CardHeader>
+                            <CardTitle>Push Pull Legs</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4 pt-4">
-                            {day.exercises.map((ex, exIndex) => (
-                                <div key={exIndex} className="flex gap-2 items-start">
-                                    <div className="flex-1 space-y-2">
-                                        <Select
-                                            value={ex.exercise_id}
-                                            onValueChange={(val) => updateExercise(dayIndex, exIndex, 'exercise_id', val)}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select Exercise" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {exercises?.map((e) => (
-                                                    <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <div className="flex gap-2">
-                                            <div className="flex-1">
-                                                <Input
-                                                    type="number"
-                                                    value={ex.sets}
-                                                    onChange={(e) => updateExercise(dayIndex, exIndex, 'sets', parseInt(e.target.value))}
-                                                    placeholder="Sets"
-                                                />
-                                            </div>
-                                            <div className="flex-1">
-                                                <Input
-                                                    value={ex.reps}
-                                                    onChange={(e) => updateExercise(dayIndex, exIndex, 'reps', e.target.value)}
-                                                    placeholder="Reps"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" size="icon" onClick={() => removeExerciseFromDay(dayIndex, exIndex)}>
-                                        <Trash2 className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                </div>
-                            ))}
-                            <Button variant="outline" size="sm" onClick={() => addExerciseToDay(dayIndex)} className="w-full">
-                                <Plus className="mr-2 h-4 w-4" /> Add Exercise
-                            </Button>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm">6 days/week. High frequency, great for hypertrophy.</p>
                         </CardContent>
                     </Card>
-                ))}
-            </div>
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95" onClick={() => applyTemplate('ul')}>
+                        <CardHeader>
+                            <CardTitle>Upper Lower</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm">4 days/week. Balanced approach for strength and size.</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95" onClick={() => applyTemplate('fb')}>
+                        <CardHeader>
+                            <CardTitle>Full Body</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm">3 days/week. Efficient for beginners or busy schedules.</p>
+                        </CardContent>
+                    </Card>
+                    <Card className="cursor-pointer hover:bg-accent/50 transition-all hover:scale-[1.02] active:scale-95 border-dashed" onClick={() => applyTemplate('empty')}>
+                        <CardHeader>
+                            <CardTitle>Start from Scratch</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-muted-foreground text-sm">Build your own custom schedule from the ground up.</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            ) : (
+                <>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Program Name</Label>
+                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. PPL Strength" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Goal: Hypertrophy..." />
+                        </div>
+                    </div>
 
-            <div className="fixed bottom-20 right-4 left-4">
-                <Button className="w-full shadow-lg" size="lg" onClick={handleSubmit} disabled={isSubmitting || !name}>
-                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    Save Program
-                </Button>
-            </div>
+                    <div className="space-y-6">
+                        {days.map((day, dayIndex) => (
+                            <Card key={dayIndex} className="relative">
+                                <CardHeader className="pb-2 bg-muted/30">
+                                    <CardTitle className="text-lg">{day.name}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4 pt-4">
+                                    {day.exercises.map((ex, exIndex) => (
+                                        <div key={exIndex} className="flex gap-2 items-start">
+                                            <div className="flex-1 space-y-2">
+                                                <Select
+                                                    value={ex.exercise_id}
+                                                    onValueChange={(val) => updateExercise(dayIndex, exIndex, 'exercise_id', val)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select Exercise" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {exercises?.map((e) => (
+                                                            <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <div className="flex gap-2">
+                                                    <div className="flex-1">
+                                                        <Input
+                                                            type="number"
+                                                            value={ex.sets}
+                                                            onChange={(e) => updateExercise(dayIndex, exIndex, 'sets', parseInt(e.target.value))}
+                                                            placeholder="Sets"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <Input
+                                                            value={ex.reps}
+                                                            onChange={(e) => updateExercise(dayIndex, exIndex, 'reps', e.target.value)}
+                                                            placeholder="Reps"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Button variant="ghost" size="icon" onClick={() => removeExerciseFromDay(dayIndex, exIndex)}>
+                                                <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                    <Button variant="outline" size="sm" onClick={() => addExerciseToDay(dayIndex)} className="w-full">
+                                        <Plus className="mr-2 h-4 w-4" /> Add Exercise
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+
+                    <div className="fixed bottom-20 right-4 left-4">
+                        <Button className="w-full shadow-lg" size="lg" onClick={handleSubmit} disabled={isSubmitting || !name}>
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            Save Program
+                        </Button>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

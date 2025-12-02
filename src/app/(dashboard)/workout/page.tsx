@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Play, Loader2, Dumbbell } from 'lucide-react'
+import { Play, Loader2, Dumbbell, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 
@@ -80,6 +80,29 @@ export default function WorkoutPage() {
         enabled: !!activeProgram
     })
 
+    // Check if today's workout is already completed
+    const { data: isWorkoutCompleted } = useQuery({
+        queryKey: ['isWorkoutCompleted', user?.id],
+        queryFn: async () => {
+            if (!user) return false
+            const startOfDay = new Date()
+            startOfDay.setHours(0, 0, 0, 0)
+            const endOfDay = new Date()
+            endOfDay.setHours(23, 59, 59, 999)
+
+            const { count } = await supabase
+                .from('workouts')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .eq('status', 'completed')
+                .gte('ended_at', startOfDay.toISOString())
+                .lte('ended_at', endOfDay.toISOString())
+
+            return count ? count > 0 : false
+        },
+        enabled: !!user
+    })
+
     const startWorkoutMutation = useMutation({
         mutationFn: async (programId?: string) => {
             if (!user) throw new Error('User not authenticated')
@@ -128,14 +151,23 @@ export default function WorkoutPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button
-                                className="w-full font-bold h-14 text-lg bg-white text-black hover:bg-white/90 shadow-md transition-all hover:scale-[1.02] active:scale-95"
-                                onClick={() => startWorkoutMutation.mutate(activeProgram.id)}
-                                disabled={startWorkoutMutation.isPending}
-                            >
-                                {startWorkoutMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5 fill-current" />}
-                                Start {todaysWorkout.name}
-                            </Button>
+                            {isWorkoutCompleted ? (
+                                <Button
+                                    className="w-full font-bold h-14 text-lg bg-white/20 text-white cursor-default hover:bg-white/20"
+                                    disabled
+                                >
+                                    <CheckCircle2 className="mr-2 h-6 w-6" /> Session Completed
+                                </Button>
+                            ) : (
+                                <Button
+                                    className="w-full font-bold h-14 text-lg bg-white text-black hover:bg-white/90 shadow-md transition-all hover:scale-[1.02] active:scale-95"
+                                    onClick={() => startWorkoutMutation.mutate(activeProgram.id)}
+                                    disabled={startWorkoutMutation.isPending}
+                                >
+                                    {startWorkoutMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Play className="mr-2 h-5 w-5 fill-current" />}
+                                    Start {todaysWorkout.name}
+                                </Button>
+                            )}
                         </CardContent>
                     </Card>
                 ) : (

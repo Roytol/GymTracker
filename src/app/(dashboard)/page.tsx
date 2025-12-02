@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Play, LogOut, Calendar as CalendarIcon } from "lucide-react"
+import { Plus, Play, LogOut, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
@@ -91,6 +91,29 @@ export default function Home() {
     enabled: !!activeProgram
   })
 
+  // Check if today's workout is already completed
+  const { data: isWorkoutCompleted } = useQuery({
+    queryKey: ['isWorkoutCompleted', user?.id],
+    queryFn: async () => {
+      if (!user) return false
+      const startOfDay = new Date()
+      startOfDay.setHours(0, 0, 0, 0)
+      const endOfDay = new Date()
+      endOfDay.setHours(23, 59, 59, 999)
+
+      const { count } = await supabase
+        .from('workouts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'completed')
+        .gte('ended_at', startOfDay.toISOString())
+        .lte('ended_at', endOfDay.toISOString())
+
+      return count ? count > 0 : false
+    },
+    enabled: !!user
+  })
+
   return (
     <div className="space-y-6">
       <header className="flex justify-between items-center sticky top-0 z-10 bg-background/80 backdrop-blur-md py-4 -mx-4 px-4 border-b border-border/40">
@@ -139,14 +162,23 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button
-                  className="w-full font-bold h-12 text-base bg-white text-black hover:bg-white/90 shadow-md transition-all hover:scale-[1.02] active:scale-95"
-                  asChild
-                >
-                  <Link href={`/workout`}>
-                    <Play className="mr-2 h-5 w-5 fill-current" /> Start Workout
-                  </Link>
-                </Button>
+                {isWorkoutCompleted ? (
+                  <Button
+                    className="w-full font-bold h-12 text-base bg-white/20 text-white cursor-default hover:bg-white/20"
+                    disabled
+                  >
+                    <CheckCircle2 className="mr-2 h-5 w-5" /> Workout Completed
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full font-bold h-12 text-base bg-white text-black hover:bg-white/90 shadow-md transition-all hover:scale-[1.02] active:scale-95"
+                    asChild
+                  >
+                    <Link href={`/workout`}>
+                      <Play className="mr-2 h-5 w-5 fill-current" /> Start Workout
+                    </Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
