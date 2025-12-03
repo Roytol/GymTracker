@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Loader2, TrendingUp } from 'lucide-react'
+import { ExercisePicker } from '@/components/ExercisePicker'
 
 type Exercise = {
     id: string
@@ -81,16 +82,12 @@ export default function ProgressPage() {
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <label className="text-sm font-medium">Select Exercise</label>
-                        <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Choose an exercise" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {exercises?.map(ex => (
-                                    <SelectItem key={ex.id} value={ex.id}>{ex.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <ExercisePicker
+                            exercises={exercises}
+                            value={selectedExerciseId}
+                            onChange={setSelectedExerciseId}
+                            placeholder="Choose an exercise"
+                        />
                     </div>
 
                     <div className="h-[300px] w-full">

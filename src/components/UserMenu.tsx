@@ -53,7 +53,7 @@ export function UserMenu() {
                         <Palette className="mr-2 h-4 w-4" />
                         <span>Theme</span>
                     </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
+                    <DropdownMenuSubContent className="bg-background/95 backdrop-blur-none border-border">
                         <DropdownMenuItem onClick={() => setTheme("light")}>
                             <Sun className="mr-2 h-4 w-4" />
                             <span>Light</span>

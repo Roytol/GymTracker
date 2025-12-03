@@ -14,6 +14,7 @@ import { Plus, Trash2, Save, Loader2, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { ExercisePicker } from '@/components/ExercisePicker'
 
 type Exercise = {
     id: string
@@ -339,19 +340,12 @@ export default function NewProgramPage() {
                                     {day.exercises.map((ex, exIndex) => (
                                         <div key={exIndex} className="flex gap-2 items-start">
                                             <div className="flex-1 space-y-2">
-                                                <Select
+                                                <ExercisePicker
+                                                    exercises={exercises}
                                                     value={ex.exercise_id}
-                                                    onValueChange={(val) => updateExercise(dayIndex, exIndex, 'exercise_id', val)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select Exercise" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {exercises?.map((e) => (
-                                                            <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                    onChange={(val) => updateExercise(dayIndex, exIndex, 'exercise_id', val)}
+                                                    placeholder="Select Exercise"
+                                                />
                                                 <div className="flex gap-2">
                                                     <div className="flex-1">
                                                         <Input
