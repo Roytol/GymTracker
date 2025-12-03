@@ -5,8 +5,14 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const createClient = () =>
     createBrowserClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+        },
         cookieOptions: {
             maxAge: 60 * 60 * 24 * 365, // 1 year
             sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
         },
     })

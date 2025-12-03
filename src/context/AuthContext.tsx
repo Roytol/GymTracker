@@ -23,26 +23,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const checkUser = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            setSession(session)
-            setUser(session?.user ?? null)
-            setLoading(false)
-            if (session?.user) {
-                console.log('[Auth] Initial session found for user:', session.user.id)
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession()
+                if (error) {
+                    console.error('[Auth] Error checking session:', error)
+                }
+
+                if (session) {
+                    console.log('[Auth] Session restored:', {
+                        user: session.user.email,
+                        expires_at: session.expires_at ? new Date(session.expires_at * 1000).toLocaleString() : 'never'
+                    })
+                    setSession(session)
+                    setUser(session.user)
+                } else {
+                    console.log('[Auth] No active session found')
+                }
+            } catch (err) {
+                console.error('[Auth] Unexpected error checking session:', err)
+            } finally {
+                setLoading(false)
             }
         }
 
         checkUser()
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            console.log(`[Auth] Auth state change: ${_event}`, session?.user?.id ? `User: ${session.user.id}` : 'No user')
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            console.log(`[Auth] State change: ${event}`, {
+                user: session?.user?.email,
+                expires_at: session?.expires_at ? new Date(session.expires_at * 1000).toLocaleString() : 'N/A'
+            })
+
             setSession(session)
             setUser(session?.user ?? null)
             setLoading(false)
+
+            if (event === 'TOKEN_REFRESHED') {
+                console.log('[Auth] Token refreshed successfully')
+            }
+            if (event === 'SIGNED_OUT') {
+                console.log('[Auth] User signed out')
+                router.refresh() // Force refresh to clear any server state
+            }
         })
 
         return () => subscription.unsubscribe()
-    }, [])
+    }, [supabase, router])
 
     const signOut = async () => {
         console.log('[Auth] Signing out...')

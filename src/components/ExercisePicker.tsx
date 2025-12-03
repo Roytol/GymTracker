@@ -113,9 +113,9 @@ function ExerciseList({
     value: string
 }) {
     return (
-        <Command>
+        <Command className="bg-background">
             <CommandInput placeholder="Search exercises..." />
-            <CommandList>
+            <CommandList className="bg-background">
                 <CommandEmpty>No exercise found.</CommandEmpty>
                 <CommandGroup>
                     {exercises?.map((exercise) => (
