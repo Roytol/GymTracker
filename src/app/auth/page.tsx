@@ -152,7 +152,7 @@ export default function AuthPage() {
                             />
                         </div>
                     </div>
-                    <CardTitle className="text-3xl font-bold tracking-tight text-[#007AFF] dark:text-[#0A84FF]">GymTracker</CardTitle>
+                    <CardTitle className="text-3xl font-bold tracking-tight text-[#007AFF] dark:text-[#0A84FF] text-midnight-gradient">GymTracker</CardTitle>
                     <CardDescription>Track your progress, achieve your goals.</CardDescription>
                 </CardHeader>
                 <CardContent>

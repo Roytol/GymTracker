@@ -66,6 +66,10 @@ export function UserMenu() {
                             <Laptop className="mr-2 h-4 w-4" />
                             <span>System</span>
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setTheme("midnight")}>
+                            <div className="mr-2 h-4 w-4 rounded-full bg-gradient-to-tr from-[#FF00FF] to-[#00FFFF]" />
+                            <span>Midnight Neon</span>
+                        </DropdownMenuItem>
                     </DropdownMenuSubContent>
                 </DropdownMenuSub>
 

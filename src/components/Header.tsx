@@ -17,7 +17,7 @@ export function Header() {
                             priority
                         />
                     </div>
-                    <div className="font-bold text-lg tracking-tight">GymTracker</div>
+                    <div className="font-bold text-lg tracking-tight text-midnight-gradient">GymTracker</div>
                 </div>
                 <UserMenu />
             </div>

@@ -131,6 +131,70 @@ body>[data-nextjs-indicator],
   --success-foreground: oklch(0 0 0);
 }
 
+.midnight {
+  /* Midnight Neon - Cyberpunk/Night Gym */
+  --background: oklch(0.05 0.05 260);
+  /* Pitch Black with deep purple tint */
+  --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.1 0.06 260);
+  /* Slightly lighter */
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.1 0.06 260);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --primary: oklch(0.65 0.3 330);
+  /* Hotter Magenta */
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.2 0.1 260);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.15 0.1 260);
+  --muted-foreground: oklch(0.7 0.05 260);
+
+  --accent: oklch(0.2 0.1 260);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.5 0.2 20);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border: oklch(0.3 0.15 260);
+  /* More vibrant border */
+  --input: oklch(0.2 0.1 260);
+  --ring: oklch(0.65 0.3 330);
+  /* Magenta ring */
+
+  --chart-1: oklch(0.65 0.3 330);
+  /* Hot Magenta */
+  --chart-2: oklch(0.75 0.25 190);
+  /* Electric Cyan */
+  --chart-3: oklch(0.8 0.25 140);
+  /* Neon Green */
+  --chart-4: oklch(0.6 0.25 280);
+  /* Electric Purple */
+  --chart-5: oklch(0.9 0.2 100);
+  /* Neon Yellow */
+
+  --sidebar: oklch(0.05 0.05 260);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.65 0.3 330);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.2 0.1 260);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.3 0.15 260);
+  --sidebar-ring: oklch(0.65 0.3 330);
+
+  --success: oklch(0.8 0.25 140);
+  /* Neon Green */
+  --success-foreground: oklch(0.05 0.05 260);
+}
+
+.midnight .text-midnight-gradient {
+  @apply bg-gradient-to-r from-[oklch(0.65_0.3_330)] to-[oklch(0.75_0.25_190)] bg-clip-text text-transparent;
+}
+
 @layer utilities {
   .glass {
     @apply bg-background/60 backdrop-blur-xl border-border/50;
