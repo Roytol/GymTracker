@@ -59,14 +59,17 @@ export default function AuthPage() {
     const onLoginSubmit = async (data: LoginFormValues) => {
         setIsLoading(true)
         setError(null)
+        console.log('[Auth] Login attempt for:', data.email)
         try {
             const { error } = await supabase.auth.signInWithPassword({
                 email: data.email,
                 password: data.password,
             })
             if (error) throw error
+            console.log('[Auth] Login successful')
             router.push('/')
         } catch (err: any) {
+            console.error('[Auth] Login error:', err)
             setError(err.message)
         } finally {
             setIsLoading(false)
@@ -76,6 +79,7 @@ export default function AuthPage() {
     const onSignupSubmit = async (data: SignupFormValues) => {
         setIsLoading(true)
         setError(null)
+        console.log('[Auth] Signup attempt for:', data.email)
         try {
             const { error } = await supabase.auth.signUp({
                 email: data.email,
@@ -85,9 +89,10 @@ export default function AuthPage() {
                 },
             })
             if (error) throw error
+            console.log('[Auth] Signup successful, waiting for verification')
             setSuccess(true)
         } catch (err: any) {
-            console.error("Signup error:", err)
+            console.error("[Auth] Signup error:", err)
             setError(err.message || "An error occurred during signup")
         } finally {
             setIsLoading(false)

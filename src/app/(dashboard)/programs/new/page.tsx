@@ -197,6 +197,7 @@ export default function NewProgramPage() {
     const handleSubmit = async () => {
         if (!user || !name) return
         setIsSubmitting(true)
+        console.log('[ProgramBuilder] Starting program creation:', { name, template: step === 'template' ? 'used' : 'custom' })
 
         try {
             // 1. Create Program
@@ -207,6 +208,7 @@ export default function NewProgramPage() {
                 .single()
 
             if (programError) throw programError
+            console.log('[ProgramBuilder] Program created:', program.id)
 
             // 2. Create Days and Exercises
             for (let i = 0; i < days.length; i++) {
@@ -247,10 +249,11 @@ export default function NewProgramPage() {
                 }
             }
 
+            console.log('[ProgramBuilder] Program creation completed successfully')
             toast.success("Program created successfully!")
             router.push('/programs')
         } catch (error) {
-            console.error('Error saving program:', error)
+            console.error('[ProgramBuilder] Error saving program:', error)
             toast.error('Failed to save program')
         } finally {
             setIsSubmitting(false)

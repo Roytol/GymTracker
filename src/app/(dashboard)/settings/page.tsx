@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Loader2, User, Settings, BarChart3 } from 'lucide-react'
 
@@ -19,6 +20,7 @@ export default function SettingsPage() {
     const queryClient = useQueryClient()
 
     const [email, setEmail] = useState('')
+    const [confirmEmail, setConfirmEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [isUpdatingAccount, setIsUpdatingAccount] = useState(false)
@@ -115,13 +117,17 @@ export default function SettingsPage() {
     })
 
     const handleUpdateEmail = async () => {
-        if (!email) return
+        if (!email || email !== confirmEmail) {
+            toast.error("Emails do not match")
+            return
+        }
         setIsUpdatingAccount(true)
         try {
             const { error } = await supabase.auth.updateUser({ email })
             if (error) throw error
             toast.success("Confirmation email sent to new address")
             setEmail('')
+            setConfirmEmail('')
         } catch (error: any) {
             toast.error(error.message || "Failed to update email")
         } finally {
@@ -225,43 +231,95 @@ export default function SettingsPage() {
                             <CardDescription>Update your email or password</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-medium">Update Email</h3>
-                                <div className="flex gap-2">
-                                    <Input
-                                        type="email"
-                                        placeholder="New Email Address"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
-                                    <Button onClick={handleUpdateEmail} disabled={isUpdatingAccount || !email}>
-                                        Update
-                                    </Button>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex items-center justify-between p-4 border rounded-lg">
+                                    <div>
+                                        <h3 className="font-medium">Email Address</h3>
+                                        <p className="text-sm text-muted-foreground">{user?.email}</p>
+                                    </div>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline">Update Email</Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Update Email</DialogTitle>
+                                                <DialogDescription>
+                                                    Enter your new email address. We'll send you a confirmation link.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="space-y-4 py-4">
+                                                <div className="space-y-2">
+                                                    <Label>New Email</Label>
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="new@example.com"
+                                                        value={email}
+                                                        onChange={(e) => setEmail(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>Confirm New Email</Label>
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="new@example.com"
+                                                        value={confirmEmail}
+                                                        onChange={(e) => setConfirmEmail(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-end gap-2">
+                                                <Button onClick={handleUpdateEmail} disabled={isUpdatingAccount || !email || email !== confirmEmail}>
+                                                    {isUpdatingAccount && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    Update Email
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
-                            </div>
 
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-medium">Change Password</h3>
-                                <div className="space-y-2">
-                                    <Input
-                                        type="password"
-                                        placeholder="New Password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
-                                    <Input
-                                        type="password"
-                                        placeholder="Confirm New Password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                    />
-                                    <Button
-                                        onClick={handleUpdatePassword}
-                                        disabled={isUpdatingAccount || !password || !confirmPassword}
-                                        className="w-full"
-                                    >
-                                        Change Password
-                                    </Button>
+                                <div className="flex items-center justify-between p-4 border rounded-lg">
+                                    <div>
+                                        <h3 className="font-medium">Password</h3>
+                                        <p className="text-sm text-muted-foreground">••••••••</p>
+                                    </div>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline">Change Password</Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Change Password</DialogTitle>
+                                                <DialogDescription>
+                                                    Enter your new password below.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="space-y-4 py-4">
+                                                <div className="space-y-2">
+                                                    <Label>New Password</Label>
+                                                    <Input
+                                                        type="password"
+                                                        value={password}
+                                                        onChange={(e) => setPassword(e.target.value)}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label>Confirm New Password</Label>
+                                                    <Input
+                                                        type="password"
+                                                        value={confirmPassword}
+                                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-end gap-2">
+                                                <Button onClick={handleUpdatePassword} disabled={isUpdatingAccount || !password || password !== confirmPassword}>
+                                                    {isUpdatingAccount && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    Change Password
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                             </div>
                         </CardContent>

@@ -185,6 +185,7 @@ export default function ActiveWorkoutPage() {
 
     const finishWorkoutMutation = useMutation({
         mutationFn: async () => {
+            console.log('[WorkoutSession] Finishing workout:', workoutId)
             // Save logs
             const { error: logsError } = await supabase.from('workout_logs').insert(
                 logs.map(log => ({
@@ -206,6 +207,7 @@ export default function ActiveWorkoutPage() {
             if (updateError) throw updateError
         },
         onSuccess: () => {
+            console.log('[WorkoutSession] Workout finished successfully')
             confetti({
                 particleCount: 100,
                 spread: 70,
@@ -213,6 +215,10 @@ export default function ActiveWorkoutPage() {
             })
             toast.success("Workout completed! Great job!")
             router.push('/')
+        },
+        onError: (error) => {
+            console.error('[WorkoutSession] Error finishing workout:', error)
+            toast.error("Failed to finish workout")
         }
     })
 

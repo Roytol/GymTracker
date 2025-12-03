@@ -27,11 +27,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSession(session)
             setUser(session?.user ?? null)
             setLoading(false)
+            if (session?.user) {
+                console.log('[Auth] Initial session found for user:', session.user.id)
+            }
         }
 
         checkUser()
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            console.log(`[Auth] Auth state change: ${_event}`, session?.user?.id ? `User: ${session.user.id}` : 'No user')
             setSession(session)
             setUser(session?.user ?? null)
             setLoading(false)
@@ -41,8 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [])
 
     const signOut = async () => {
-        await supabase.auth.signOut()
-        router.push('/auth')
+        console.log('[Auth] Signing out...')
+        try {
+            await supabase.auth.signOut()
+            console.log('[Auth] Signed out successfully')
+            router.push('/auth')
+        } catch (error) {
+            console.error('[Auth] Sign out error:', error)
+        }
     }
 
     return (

@@ -62,6 +62,7 @@ export default function ExercisesPage() {
 
     const addExerciseMutation = useMutation({
         mutationFn: async (exerciseData: { name: string; category: string; description: string }) => {
+            console.log('[ExerciseManager] Adding custom exercise:', exerciseData.name)
             const { data, error } = await supabase
                 .from('exercises')
                 .insert({
@@ -75,16 +76,22 @@ export default function ExercisesPage() {
             if (error) throw error
             return data
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
+            console.log('[ExerciseManager] Custom exercise added:', data.id)
             queryClient.invalidateQueries({ queryKey: ['exercises'] })
             setIsDialogOpen(false)
             setNewExercise({ name: '', category: '', description: '' })
             toast.success("Exercise added successfully")
+        },
+        onError: (error) => {
+            console.error('[ExerciseManager] Error adding exercise:', error)
+            toast.error("Failed to add exercise")
         }
     })
 
     const updateExerciseMutation = useMutation({
         mutationFn: async (exerciseData: { id: string; name: string; category: string; description: string }) => {
+            console.log('[ExerciseManager] Updating exercise:', exerciseData.id)
             const { data, error } = await supabase
                 .from('exercises')
                 .update({
@@ -100,20 +107,31 @@ export default function ExercisesPage() {
             return data
         },
         onSuccess: () => {
+            console.log('[ExerciseManager] Exercise updated successfully')
             setIsEditMode(false)
             setNewExercise({ name: '', category: '', description: '' })
             toast.success("Exercise updated successfully")
+        },
+        onError: (error) => {
+            console.error('[ExerciseManager] Error updating exercise:', error)
+            toast.error("Failed to update exercise")
         }
     })
 
     const deleteExerciseMutation = useMutation({
         mutationFn: async (id: string) => {
+            console.log('[ExerciseManager] Deleting exercise:', id)
             const { error } = await supabase.from('exercises').delete().eq('id', id)
             if (error) throw error
         },
         onSuccess: () => {
+            console.log('[ExerciseManager] Exercise deleted successfully')
             queryClient.invalidateQueries({ queryKey: ['exercises'] })
             toast.success("Exercise deleted successfully")
+        },
+        onError: (error) => {
+            console.error('[ExerciseManager] Error deleting exercise:', error)
+            toast.error("Failed to delete exercise")
         }
     })
 
