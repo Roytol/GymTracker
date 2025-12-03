@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Play, Loader2, Dumbbell, CheckCircle2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 import { WorkoutHistory } from '@/components/WorkoutHistory'
 
@@ -139,9 +140,7 @@ export default function WorkoutPage() {
             <section>
                 <h2 className="text-xl font-semibold mb-4">Today&apos;s Session</h2>
                 {isLoading ? (
-                    <div className="flex justify-center p-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
+                    <LoadingSpinner />
                 ) : activeProgram && todaysWorkout && todaysWorkout.exercises.length > 0 ? (
                     <Card className="bg-primary text-primary-foreground border-none shadow-lg relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />

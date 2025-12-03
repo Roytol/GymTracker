@@ -9,6 +9,14 @@ import { WeeklyCalendar } from "@/components/WeeklyCalendar"
 import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase"
 import { CelebrationCheck } from "@/components/CelebrationCheck"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
+
+// ... imports ...
+
+// ... inside component ...
+
+// Loading State
+
 
 type Program = {
   id: string
@@ -147,6 +155,13 @@ export default function Home() {
     },
     enabled: !!user
   })
+
+  // Loading State
+  const isLoading = !activeProgram && !schedule
+
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
 
   return (
     <div className="space-y-6">

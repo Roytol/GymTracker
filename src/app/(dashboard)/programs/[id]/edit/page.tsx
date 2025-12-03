@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, Save, Loader2, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 type Exercise = {
     id: string
@@ -187,7 +188,7 @@ export default function EditProgramPage() {
     }
 
     if (isProgramLoading) {
-        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+        return <LoadingSpinner />
     }
 
     return (

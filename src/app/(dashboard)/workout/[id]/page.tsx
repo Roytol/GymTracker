@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Check, Loader2, ArrowLeft, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 type WorkoutLog = {
     id?: string
@@ -222,7 +223,7 @@ export default function ActiveWorkoutPage() {
         }
     })
 
-    if (workoutLoading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin" /></div>
+    if (workoutLoading) return <LoadingSpinner />
 
     if (workout?.program_id && !selectedDayId) {
         return (

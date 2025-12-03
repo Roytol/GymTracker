@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Calendar, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 type Program = {
     id: string
@@ -74,7 +75,7 @@ export default function ProgramDetailsPage() {
     })
 
     if (programLoading || daysLoading) {
-        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+        return <LoadingSpinner />
     }
 
     if (!program) {

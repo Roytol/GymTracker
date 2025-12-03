@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { Loader2, User, Settings, BarChart3 } from 'lucide-react'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 export default function SettingsPage() {
     const { user } = useAuth()
@@ -155,7 +156,7 @@ export default function SettingsPage() {
     }
 
     if (profileLoading) {
-        return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+        return <LoadingSpinner />
     }
 
     return (
@@ -334,7 +335,7 @@ export default function SettingsPage() {
                         </CardHeader>
                         <CardContent>
                             {statsLoading ? (
-                                <div className="flex justify-center p-4"><Loader2 className="animate-spin" /></div>
+                                <LoadingSpinner />
                             ) : (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-muted/50 p-4 rounded-lg text-center">

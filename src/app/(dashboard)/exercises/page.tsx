@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectValue, SelectTrigger } from '@
 import { Plus, Search, Loader2, Trash2, Pencil, Dumbbell } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/context/AuthContext'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { toast } from 'sonner'
 import {
     AlertDialog,
@@ -239,7 +240,7 @@ export default function ExercisesPage() {
 
             <div className="space-y-4">
                 {isLoading ? (
-                    <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+                    <LoadingSpinner />
                 ) : filteredExercises?.length === 0 ? (
                     <div className="text-center p-8 text-muted-foreground">No exercises found</div>
                 ) : (

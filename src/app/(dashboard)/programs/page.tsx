@@ -8,6 +8,7 @@ import { Plus, Loader2, Trash2, Pencil, CheckCircle2, Circle } from 'lucide-reac
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 import { cn } from "@/lib/utils"
+import { LoadingSpinner } from "@/components/LoadingSpinner"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -91,7 +92,7 @@ export default function ProgramsPage() {
 
             <div className="space-y-4">
                 {isLoading ? (
-                    <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+                    <LoadingSpinner />
                 ) : programs?.length === 0 ? (
                     <div className="text-center p-8 text-muted-foreground">
                         No programs found. Create your first one!

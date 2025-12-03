@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Loader2, TrendingUp } from 'lucide-react'
 import { ExercisePicker } from '@/components/ExercisePicker'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 type Exercise = {
     id: string
@@ -93,9 +94,7 @@ export default function ProgressPage() {
                     <div className="h-[300px] w-full">
                         {selectedExerciseId ? (
                             logsLoading ? (
-                                <div className="h-full flex items-center justify-center">
-                                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                                </div>
+                                <LoadingSpinner />
                             ) : chartData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={chartData}>
