@@ -37,14 +37,36 @@ export default function NewProgramPage() {
     const [step, setStep] = useState<'template' | 'builder'>('template')
     const [name, setName] = useState('')
     const [description, setDescription] = useState('')
-    const [days, setDays] = useState<ProgramDay[]>(
-        WEEKDAYS.map(day => ({ name: day, exercises: [] }))
-    )
+    const [days, setDays] = useState<ProgramDay[]>([]) // Initialize empty, set after profile fetch
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [weekStart, setWeekStart] = useState<'monday' | 'sunday'>('monday')
 
     const router = useRouter()
     const { user } = useAuth()
     const supabase = createClient()
+
+    // Fetch Profile for Week Start Preference
+    useQuery({
+        queryKey: ['profile', user?.id],
+        queryFn: async () => {
+            if (!user) return null
+            const { data, error } = await supabase.from('profiles').select('week_start_day').eq('id', user.id).single()
+            if (error) throw error
+
+            const startDay = (data?.week_start_day as 'monday' | 'sunday') || 'monday'
+            setWeekStart(startDay)
+
+            // Initialize days based on preference
+            const orderedDays = startDay === 'monday'
+                ? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+                : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+            setDays(orderedDays.map(day => ({ name: day, exercises: [] })))
+
+            return data
+        },
+        enabled: !!user && days.length === 0 // Only run once to init
+    })
 
     const { data: exercises } = useQuery({
         queryKey: ['exercises'],
@@ -74,7 +96,11 @@ export default function NewProgramPage() {
     }
 
     const applyTemplate = (type: 'empty' | 'ppl' | 'ul' | 'fb' | 'pp') => {
-        let newDays: ProgramDay[] = WEEKDAYS.map(day => ({ name: day, exercises: [] }))
+        const orderedDays = weekStart === 'monday'
+            ? ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+        let newDays: ProgramDay[] = orderedDays.map(day => ({ name: day, exercises: [] }))
         let newName = ''
         let newDesc = ''
 
@@ -92,153 +118,68 @@ export default function NewProgramPage() {
             reps
         })
 
+        // Helper to set day content safely handling index shifts
+        const setDay = (dayIndex: number, name: string, exercises: ProgramExercise[]) => {
+            // If Sunday start, we need to shift indices.
+            // PPL (Mon start): 0=Push, 1=Pull, 2=Legs...
+            // If Sunday start: 0=Sunday(Rest?), 1=Push, 2=Pull...
+            // BUT, usually people want to start their "Week 1" on their first day.
+            // So if I start on Sunday, Day 0 (Sunday) should probably be Push A?
+            // OR, should we keep "Monday is Push A"?
+            // The user asked: "let choose the workout format week, or just do it same as the user settings."
+            // "Same as user settings" implies if my week starts Sunday, my program starts Sunday.
+            // So Day 0 (Sunday) gets the first workout of the split.
+
+            if (dayIndex < newDays.length) {
+                newDays[dayIndex].name = name
+                newDays[dayIndex].exercises = exercises
+            }
+        }
+
         switch (type) {
             case 'ppl':
                 newName = 'Push Pull Legs'
                 newDesc = '6-day split focusing on pushing, pulling, and leg movements.'
-                // Mon=Push, Tue=Pull, Wed=Legs, Thu=Push, Fri=Pull, Sat=Legs
-                newDays[0].name = 'Push A'
-                newDays[0].exercises = [
-                    createEx('Bench Press'),
-                    createEx('Overhead Press'),
-                    createEx('Incline Dumbbell Press'),
-                    createEx('Tricep Pushdown')
-                ]
-                newDays[1].name = 'Pull A'
-                newDays[1].exercises = [
-                    createEx('Deadlift'),
-                    createEx('Pull Up'),
-                    createEx('Barbell Row'),
-                    createEx('Bicep Curl')
-                ]
-                newDays[2].name = 'Legs A'
-                newDays[2].exercises = [
-                    createEx('Squat'),
-                    createEx('Leg Press'),
-                    createEx('Leg Extension'),
-                    createEx('Calf Raise')
-                ]
-                newDays[3].name = 'Push B'
-                newDays[3].exercises = [
-                    createEx('Overhead Press'),
-                    createEx('Bench Press'),
-                    createEx('Lateral Raise'),
-                    createEx('Skullcrusher')
-                ]
-                newDays[4].name = 'Pull B'
-                newDays[4].exercises = [
-                    createEx('Barbell Row'),
-                    createEx('Lat Pulldown'),
-                    createEx('Face Pull'),
-                    createEx('Hammer Curl')
-                ]
-                newDays[5].name = 'Legs B'
-                newDays[5].exercises = [
-                    createEx('Deadlift'),
-                    createEx('Lunge'),
-                    createEx('Leg Curl'),
-                    createEx('Calf Raise')
-                ]
-                newDays[6].name = 'Rest'
+                setDay(0, 'Push A', [createEx('Bench Press'), createEx('Overhead Press'), createEx('Incline Dumbbell Press'), createEx('Tricep Pushdown')])
+                setDay(1, 'Pull A', [createEx('Deadlift'), createEx('Pull Up'), createEx('Barbell Row'), createEx('Bicep Curl')])
+                setDay(2, 'Legs A', [createEx('Squat'), createEx('Leg Press'), createEx('Leg Extension'), createEx('Calf Raise')])
+                setDay(3, 'Push B', [createEx('Overhead Press'), createEx('Bench Press'), createEx('Lateral Raise'), createEx('Skullcrusher')])
+                setDay(4, 'Pull B', [createEx('Barbell Row'), createEx('Lat Pulldown'), createEx('Face Pull'), createEx('Hammer Curl')])
+                setDay(5, 'Legs B', [createEx('Deadlift'), createEx('Lunge'), createEx('Leg Curl'), createEx('Calf Raise')])
+                setDay(6, 'Rest', [])
                 break
             case 'ul':
                 newName = 'Upper Lower'
                 newDesc = '4-day split dividing training into upper and lower body sessions.'
-                // Mon=Upper, Tue=Lower, Thu=Upper, Fri=Lower
-                newDays[0].name = 'Upper A'
-                newDays[0].exercises = [
-                    createEx('Bench Press'),
-                    createEx('Barbell Row'),
-                    createEx('Overhead Press'),
-                    createEx('Lat Pulldown')
-                ]
-                newDays[1].name = 'Lower A'
-                newDays[1].exercises = [
-                    createEx('Squat'),
-                    createEx('Deadlift'),
-                    createEx('Leg Extension'),
-                    createEx('Leg Curl')
-                ]
-                newDays[2].name = 'Rest'
-                newDays[3].name = 'Upper B'
-                newDays[3].exercises = [
-                    createEx('Incline Dumbbell Press'),
-                    createEx('Pull Up'),
-                    createEx('Lateral Raise'),
-                    createEx('Bicep Curl')
-                ]
-                newDays[4].name = 'Lower B'
-                newDays[4].exercises = [
-                    createEx('Leg Press'),
-                    createEx('Lunge'),
-                    createEx('Calf Raise'),
-                    createEx('Plank')
-                ]
-                newDays[5].name = 'Rest'
-                newDays[6].name = 'Rest'
+                setDay(0, 'Upper A', [createEx('Bench Press'), createEx('Barbell Row'), createEx('Overhead Press'), createEx('Lat Pulldown')])
+                setDay(1, 'Lower A', [createEx('Squat'), createEx('Deadlift'), createEx('Leg Extension'), createEx('Leg Curl')])
+                setDay(2, 'Rest', [])
+                setDay(3, 'Upper B', [createEx('Incline Dumbbell Press'), createEx('Pull Up'), createEx('Lateral Raise'), createEx('Bicep Curl')])
+                setDay(4, 'Lower B', [createEx('Leg Press'), createEx('Lunge'), createEx('Calf Raise'), createEx('Plank')])
+                setDay(5, 'Rest', [])
+                setDay(6, 'Rest', [])
                 break
             case 'fb':
                 newName = 'Full Body'
                 newDesc = '3-day split working the entire body each session.'
-                // Mon, Wed, Fri
-                newDays[0].name = 'Full Body A'
-                newDays[0].exercises = [
-                    createEx('Squat'),
-                    createEx('Bench Press'),
-                    createEx('Barbell Row')
-                ]
-                newDays[1].name = 'Rest'
-                newDays[2].name = 'Full Body B'
-                newDays[2].exercises = [
-                    createEx('Deadlift'),
-                    createEx('Overhead Press'),
-                    createEx('Pull Up')
-                ]
-                newDays[3].name = 'Rest'
-                newDays[4].name = 'Full Body C'
-                newDays[4].exercises = [
-                    createEx('Lunge'),
-                    createEx('Dips'),
-                    createEx('Chin Up')
-                ]
-                newDays[5].name = 'Rest'
-                newDays[6].name = 'Rest'
+                setDay(0, 'Full Body A', [createEx('Squat'), createEx('Bench Press'), createEx('Barbell Row')])
+                setDay(1, 'Rest', [])
+                setDay(2, 'Full Body B', [createEx('Deadlift'), createEx('Overhead Press'), createEx('Pull Up')])
+                setDay(3, 'Rest', [])
+                setDay(4, 'Full Body C', [createEx('Lunge'), createEx('Dips'), createEx('Chin Up')])
+                setDay(5, 'Rest', [])
+                setDay(6, 'Rest', [])
                 break
             case 'pp':
                 newName = 'Push Pull'
                 newDesc = '4-day split focusing on upper body push and pull movements.'
-                // Mon=Push, Tue=Pull, Thu=Push, Fri=Pull
-                newDays[0].name = 'Push A'
-                newDays[0].exercises = [
-                    createEx('Bench Press'),
-                    createEx('Overhead Press'),
-                    createEx('Incline Dumbbell Press'),
-                    createEx('Tricep Pushdown')
-                ]
-                newDays[1].name = 'Pull A'
-                newDays[1].exercises = [
-                    createEx('Barbell Row'),
-                    createEx('Lat Pulldown'),
-                    createEx('Face Pull'),
-                    createEx('Bicep Curl')
-                ]
-                newDays[2].name = 'Rest'
-                newDays[3].name = 'Push B'
-                newDays[3].exercises = [
-                    createEx('Overhead Press'),
-                    createEx('Dips'),
-                    createEx('Lateral Raise'),
-                    createEx('Skullcrusher')
-                ]
-                newDays[4].name = 'Pull B'
-                newDays[4].exercises = [
-                    createEx('Pull Up'),
-                    createEx('Seated Row'),
-                    createEx('Hammer Curl'),
-                    createEx('Shrugs')
-                ]
-                newDays[5].name = 'Rest'
-                newDays[6].name = 'Rest'
+                setDay(0, 'Push A', [createEx('Bench Press'), createEx('Overhead Press'), createEx('Incline Dumbbell Press'), createEx('Tricep Pushdown')])
+                setDay(1, 'Pull A', [createEx('Barbell Row'), createEx('Lat Pulldown'), createEx('Face Pull'), createEx('Bicep Curl')])
+                setDay(2, 'Rest', [])
+                setDay(3, 'Push B', [createEx('Overhead Press'), createEx('Dips'), createEx('Lateral Raise'), createEx('Skullcrusher')])
+                setDay(4, 'Pull B', [createEx('Pull Up'), createEx('Seated Row'), createEx('Hammer Curl'), createEx('Shrugs')])
+                setDay(5, 'Rest', [])
+                setDay(6, 'Rest', [])
                 break
             case 'empty':
             default:
@@ -270,14 +211,18 @@ export default function NewProgramPage() {
             // 2. Create Days and Exercises
             for (let i = 0; i < days.length; i++) {
                 const day = days[i]
-                // Only insert days that have exercises? Or all days? 
-                // Let's insert all days to keep the structure consistent, or maybe just days with exercises.
-                // For a weekly schedule, it's better to have all days implicitly or explicitly.
-                // Let's insert all days so we can query by day name/order easily.
+
+                // Calculate correct DB order (Monday=0)
+                // If weekStart is Monday: i=0 is Mon(0), i=1 is Tue(1)...
+                // If weekStart is Sunday: i=0 is Sun(6), i=1 is Mon(0)...
+                let dbOrder = i
+                if (weekStart === 'sunday') {
+                    dbOrder = i === 0 ? 6 : i - 1
+                }
 
                 const { data: dayData, error: dayError } = await supabase
                     .from('program_days')
-                    .insert({ program_id: program.id, name: day.name, order: i })
+                    .insert({ program_id: program.id, name: day.name, order: dbOrder })
                     .select()
                     .single()
 

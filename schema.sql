@@ -7,6 +7,8 @@ create table profiles (
   email text unique not null,
   full_name text,
   avatar_url text,
+  units text default 'kg', -- 'kg' or 'lbs'
+  week_start_day text default 'monday', -- 'monday' or 'sunday'
   updated_at timestamp with time zone
 );
 

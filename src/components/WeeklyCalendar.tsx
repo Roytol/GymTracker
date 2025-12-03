@@ -3,22 +3,26 @@
 import { cn } from "@/lib/utils"
 import { Dumbbell, Moon } from "lucide-react"
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const FULL_WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
 type WeeklyCalendarProps = {
     schedule?: {
         dayName: string
         dayOrder: number
         hasWorkout: boolean
     }[]
+    weekStart?: 'monday' | 'sunday'
 }
 
-export function WeeklyCalendar({ schedule }: WeeklyCalendarProps) {
+export function WeeklyCalendar({ schedule, weekStart = 'monday' }: WeeklyCalendarProps) {
     const today = new Date()
-    const currentDayIndex = (today.getDay() + 6) % 7 // Shift so Monday is 0, Sunday is 6
 
-    // Generate dates for the current week (starting Monday)
+    // Adjust current day index based on week start
+    // If Monday start: Mon=0, Sun=6. (today.getDay() + 6) % 7
+    // If Sunday start: Sun=0, Sat=6. today.getDay()
+    const currentDayIndex = weekStart === 'monday'
+        ? (today.getDay() + 6) % 7
+        : today.getDay()
+
+    // Generate dates for the current week
     const startOfWeek = new Date(today)
     startOfWeek.setDate(today.getDate() - currentDayIndex)
 
@@ -26,11 +30,20 @@ export function WeeklyCalendar({ schedule }: WeeklyCalendarProps) {
         const date = new Date(startOfWeek)
         date.setDate(startOfWeek.getDate() + i)
 
-        const dayName = FULL_WEEKDAYS[i]
-        const hasWorkout = schedule?.find(s => s.dayOrder === i)?.hasWorkout
+        // Determine day name based on date
+        const shortDayName = date.toLocaleDateString('en-US', { weekday: 'short' })
+
+        // Calculate the corresponding database day index (Monday=0)
+        // If weekStart is 'monday', i maps 1:1 (0=Mon, ..., 6=Sun)
+        // If weekStart is 'sunday', i=0 is Sun (DB=6), i=1 is Mon (DB=0)
+        const dbDayIndex = weekStart === 'monday'
+            ? i
+            : (i + 6) % 7
+
+        const hasWorkout = schedule?.find(s => s.dayOrder === dbDayIndex)?.hasWorkout
 
         return {
-            day: WEEKDAYS[i],
+            day: shortDayName,
             date: date.getDate(),
             isToday: i === currentDayIndex,
             hasWorkout

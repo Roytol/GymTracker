@@ -2,14 +2,12 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Play, LogOut, Calendar as CalendarIcon, CheckCircle2, Dumbbell } from "lucide-react"
+import { Plus, Play, Calendar as CalendarIcon, CheckCircle2, Dumbbell } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
 import { useAuth } from "@/context/AuthContext"
 import { WeeklyCalendar } from "@/components/WeeklyCalendar"
 import { useQuery } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase"
-import { ThemeToggle } from "@/components/ThemeToggle"
 import { CelebrationCheck } from "@/components/CelebrationCheck"
 
 type Program = {
@@ -23,16 +21,37 @@ type ProgramDay = {
   exercises: any[]
 }
 
-const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
 
 export default function Home() {
   const { signOut, user } = useAuth()
   const supabase = createClient()
   const today = new Date()
-  const currentDayIndex = (today.getDay() + 6) % 7 // Mon=0, Sun=6
-  const currentDayName = WEEKDAYS[currentDayIndex]
 
   const formattedDate = today.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })
+
+  // Fetch User Profile for Settings
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null
+      const { data, error } = await supabase.from('profiles').select('week_start_day').eq('id', user.id).single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!user
+  })
+
+  const weekStart = (profile?.week_start_day as 'monday' | 'sunday') || 'monday'
+
+  // Calculate current day index based on week start preference
+  // If Monday start: Mon=0, Sun=6. (today.getDay() + 6) % 7
+  // If Sunday start: Sun=0, Sat=6. today.getDay()
+  const currentDayIndex = weekStart === 'monday'
+    ? (today.getDay() + 6) % 7
+    : today.getDay()
+
+  const currentDayName = today.toLocaleDateString('en-US', { weekday: 'long' })
 
   // Fetch most recent program
   const { data: activeProgram } = useQuery({
@@ -54,19 +73,33 @@ export default function Home() {
   })
 
   // Fetch today's workout for the active program
+  // We match by day name now to be safe regardless of order index
   const { data: todaysWorkout } = useQuery({
     queryKey: ['todaysWorkout', activeProgram?.id, currentDayName],
     queryFn: async () => {
       if (!activeProgram) return null
-      const { data, error } = await supabase
+
+      // First try to find by name (safer)
+      const { data: byName, error: nameError } = await supabase
         .from('program_days')
         .select('*, exercises:program_exercises(*)')
         .eq('program_id', activeProgram.id)
-        .eq('"order"', currentDayIndex)
-        .single()
+        .ilike('name', currentDayName)
+        .maybeSingle()
 
-      if (error && error.code !== 'PGRST116') throw error
-      return data as ProgramDay | null
+      if (byName) return byName as ProgramDay
+
+      // Fallback to order if name doesn't match (legacy support)
+      // Note: This fallback assumes order was created with Monday=0
+      // If we want to support Sunday start fully, program creation should probably store day names or explicit indices
+      const { data: byOrder, error: orderError } = await supabase
+        .from('program_days')
+        .select('*, exercises:program_exercises(*)')
+        .eq('program_id', activeProgram.id)
+        .eq('"order"', (today.getDay() + 6) % 7) // Always use Monday-based index for fallback as that's how it was likely created
+        .maybeSingle()
+
+      return byOrder as ProgramDay | null
     },
     enabled: !!activeProgram
   })
@@ -117,31 +150,9 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <header className="flex justify-between items-center sticky top-0 z-10 bg-background/80 backdrop-blur-md py-4 -mx-4 px-4 border-b border-border/40">
-        <div className="flex items-center gap-3">
-          <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-sm">
-            <Image
-              src="/logo-v2.png"
-              alt="GymTracker Logo"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-primary leading-none">GymTracker</h1>
-            <p className="text-muted-foreground text-xs font-medium">{formattedDate}</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <ThemeToggle />
-          <Button size="icon" variant="ghost" onClick={() => signOut()} className="rounded-full hover:bg-muted hover:bg-red-500/10">
-            <LogOut className="h-5 w-5 text-red-500" />
-          </Button>
-        </div>
-      </header>
 
-      <WeeklyCalendar schedule={schedule} />
+
+      <WeeklyCalendar schedule={schedule} weekStart={weekStart} />
 
       {/* Celebration Message */}
       {schedule?.find(d => d.dayOrder === currentDayIndex && d.hasWorkout) && (
