@@ -1,0 +1,29 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Keep-Alive Endpoint
+        run: |
+          if [ -z "${{ secrets.WEBSITE_URL }}" ]; then
+            echo "WEBSITE_URL secret is not set. Skipping ping."
+            exit 1
+          fi
+
+          echo "Pinging ${{ secrets.WEBSITE_URL }}/api/keep-alive..."
+          
+          response=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${{ secrets.WEBSITE_URL }}/api/keep-alive" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          
+          if [ "$response" -eq 200 ]; then
+            echo "Success! Endpoint returned 200."
+          else
+            echo "Failed! Endpoint returned $response"
+            exit 1
+          fi
