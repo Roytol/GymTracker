@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         }
     }
 
-    const supabase = await createClient()
+    const supabase = createServerSupabaseClient()
 
     // Perform a simple query to generate activity
     // We select count of profiles. Even if RLS blocks it or returns 0, it hits the API.

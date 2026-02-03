@@ -80,13 +80,91 @@ create policy "Users can update own profile." on profiles for update using (auth
 alter table exercises enable row level security;
 create policy "Exercises are viewable by everyone." on exercises for select using (true);
 create policy "Users can insert their own custom exercises." on exercises for insert with check (auth.uid() = user_id);
+create policy "Users can update own custom exercises." on exercises for update using (auth.uid() = user_id);
+create policy "Users can delete own custom exercises." on exercises for delete using (auth.uid() = user_id);
 
 alter table programs enable row level security;
 create policy "Users can view own programs." on programs for select using (auth.uid() = user_id);
 create policy "Users can insert own programs." on programs for insert with check (auth.uid() = user_id);
 create policy "Users can update own programs." on programs for update using (auth.uid() = user_id);
+create policy "Users can delete own programs." on programs for delete using (auth.uid() = user_id);
+
+alter table program_days enable row level security;
+create policy "Users can view own program days." on program_days for select using (
+  exists (
+    select 1 from programs p where p.id = program_days.program_id and p.user_id = auth.uid()
+  )
+);
+create policy "Users can insert own program days." on program_days for insert with check (
+  exists (
+    select 1 from programs p where p.id = program_days.program_id and p.user_id = auth.uid()
+  )
+);
+create policy "Users can update own program days." on program_days for update using (
+  exists (
+    select 1 from programs p where p.id = program_days.program_id and p.user_id = auth.uid()
+  )
+);
+create policy "Users can delete own program days." on program_days for delete using (
+  exists (
+    select 1 from programs p where p.id = program_days.program_id and p.user_id = auth.uid()
+  )
+);
+
+alter table program_exercises enable row level security;
+create policy "Users can view own program exercises." on program_exercises for select using (
+  exists (
+    select 1 from program_days d
+    join programs p on p.id = d.program_id
+    where d.id = program_exercises.day_id and p.user_id = auth.uid()
+  )
+);
+create policy "Users can insert own program exercises." on program_exercises for insert with check (
+  exists (
+    select 1 from program_days d
+    join programs p on p.id = d.program_id
+    where d.id = program_exercises.day_id and p.user_id = auth.uid()
+  )
+);
+create policy "Users can update own program exercises." on program_exercises for update using (
+  exists (
+    select 1 from program_days d
+    join programs p on p.id = d.program_id
+    where d.id = program_exercises.day_id and p.user_id = auth.uid()
+  )
+);
+create policy "Users can delete own program exercises." on program_exercises for delete using (
+  exists (
+    select 1 from program_days d
+    join programs p on p.id = d.program_id
+    where d.id = program_exercises.day_id and p.user_id = auth.uid()
+  )
+);
 
 alter table workouts enable row level security;
 create policy "Users can view own workouts." on workouts for select using (auth.uid() = user_id);
 create policy "Users can insert own workouts." on workouts for insert with check (auth.uid() = user_id);
 create policy "Users can update own workouts." on workouts for update using (auth.uid() = user_id);
+create policy "Users can delete own workouts." on workouts for delete using (auth.uid() = user_id);
+
+alter table workout_logs enable row level security;
+create policy "Users can view own workout logs." on workout_logs for select using (
+  exists (
+    select 1 from workouts w where w.id = workout_logs.workout_id and w.user_id = auth.uid()
+  )
+);
+create policy "Users can insert own workout logs." on workout_logs for insert with check (
+  exists (
+    select 1 from workouts w where w.id = workout_logs.workout_id and w.user_id = auth.uid()
+  )
+);
+create policy "Users can update own workout logs." on workout_logs for update using (
+  exists (
+    select 1 from workouts w where w.id = workout_logs.workout_id and w.user_id = auth.uid()
+  )
+);
+create policy "Users can delete own workout logs." on workout_logs for delete using (
+  exists (
+    select 1 from workouts w where w.id = workout_logs.workout_id and w.user_id = auth.uid()
+  )
+);
